@@ -13,6 +13,11 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  repositoryName: Karuna-Hospital-ERP-C-Sharp
+  # Secret Variables
+  MAPPED_FTP_HOST: $(FTP_HOST)
+  MAPPED_FTP_USER: $(FTP_USER)
+  MAPPED_FTP_PWD: $(FTP_PWD)
 
 steps:
 - task: NuGetToolInstaller@1
@@ -31,3 +36,17 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+# Upload Binaries
+- task: FtpUpload@2
+  displayName: 'FTP Upload $(repositoryName) Binaries'
+  inputs:
+    credentialsOption: inputs
+    serverUrl: 'ftp://$(MAPPED_FTP_HOST)'
+    username: $(MAPPED_FTP_USER)
+    password: $(MAPPED_FTP_PWD)
+    # TODO : Add option for file instead of directory
+    rootDirectory: '.'
+    remoteDirectory: '/public_html/files/$(repositoryName)/$(Build.SourceVersion)'
+    preservePaths: true
+    filePatterns: '*'
